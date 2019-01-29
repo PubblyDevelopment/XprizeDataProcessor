@@ -8,7 +8,7 @@ import re
 import base64
 
 def makeFilenamesReadable(filepath) :
-    rexp = "(.*).json"
+    rexp = r"(.*).json"
 
     ### Walk thru all files, print out decoded base64 filename w/out
     ### little b thing (convert ascii to string essentially)
