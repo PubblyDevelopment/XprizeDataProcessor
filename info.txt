@@ -1,0 +1,12 @@
+{TabletID}-{UserID}-{Subject}-{UnitName}-analytics-{UnixTimeStamp}
+
+> XL: XML Loaded (Meaning a MainXML.xml file was at least there)
+> XP: XML Parsed (meaning it was at least a good file)
+> BC: Book Closed (They went back)
+> FL: First Load (Something actually displayed)
+> UT: User touch (page: page they touched, pt: XY of touch)
+> LT: Link Triggered (linkname: name of the link triggered (usually link 1))
+> PT: Page turned (page: the new page they turned to)
+> ST: Sequence Triggered (linkname: name of link triggering sequence (link 1))
+> SS: Sequence Started (first target is playing)
+> SF: Sequence finished (It all finished OK)

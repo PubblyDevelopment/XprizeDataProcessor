@@ -81,4 +81,4 @@ class dataFile:
 
         return (float(timestamps[-1])-float(timestamps[0]))/60000
 
-d = dataFile("fartFolder/", "5A27001608-2-Hatua%202-Lesson%20A-analytics-947265221619.json", "jsondata")
+#d = dataFile("fartFolder/", "5A27001608-2-Hatua%202-Lesson%20A-analytics-947265221619.json", "jsondata")

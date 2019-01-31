@@ -75,5 +75,6 @@ class dataProcessor:
         self.play_writeToCSV()
         #self.play_printAllFiles()
 
-dp = dataProcessor(sys.argv[1], sys.argv[2])
-dp.main()
+#dp = dataProcessor(sys.argv[1], sys.argv[2])
+#dp.main()
+print("hello")

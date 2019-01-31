@@ -11,17 +11,35 @@ import json
 
 
 def makeFilenamesReadable(filepath) :
-    rexp = r"(.*).json"
+    #d = base64.b64decode(x.group(1))
+    for root, dirs, files in os.walk(filepath):
+        for f in files:
+            isJSON = re.search(r"(.*).json", f)
 
-    fp = "NjExMjAwMTIwNS0xLS9hbmRyb2lkX2Fzc2V0L3d3dy9zY2hvb2wvRXBpYyUyMFF1ZXN0L3ZhcmlhYmxlLUVRX1NhbXBsZXItRVFfU2FtcGxlci5odG1sLWFuYWx5dGljcy0xNTQ2NjgzNzI1ODc0.json"
+            if (isJSON):
 
-    x = re.search(rexp, fp)
+                decodedFilename = base64.b64decode(isJSON.group(1)).decode('utf-8')
+                print(decodedFilename)
+                '''
 
-    print(x.group(1))
+                if not r"/android_asset/www/" in decodedFilename:
+                    print(decodedFilename)
+                else:
+                    x = re.search(r"android_asset/www/school/tutorials/(.*)-analytics", decodedFilename)
+                    y = re.search(r"/android_asset/www/school/Books/.*/(.*)-analytics", decodedFilename)
+                    z = re.search(r"/android_asset/www/school/Epic%20Quest/(.*)-analytics", decodedFilename)
+                    if (x):
+                        print ("EQ-tutorial-" + x.group(1))
+                    if (y):
+                        print ("EQ-book-" + y.group(1))
+                    if (z):
+                        print ("EQ-village-" + z.group(1))'''
 
-    d = base64.b64decode(x.group(1))
 
-    print(d)
+                '''if not r"/android_asset/www/" in isJSON.group(0):
+                    print(isJ)'''
+
+                r"/android_asset/www/school/tutorials/(.*)/"
 
     '''errorcount = 0
     ### Walk thru all files, print out decoded base64 filename w/out
@@ -66,4 +84,4 @@ def checkIfValidJson(filepath):
         print("Bad json at", filepath)
         return False
 
-makeFilenamesReadable("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA/2019-01-11")
+makeFilenamesReadable(r"C:\Users\murac\Documents\XprizeDataProcessing\2019-01-11")
