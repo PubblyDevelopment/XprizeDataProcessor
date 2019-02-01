@@ -7,16 +7,41 @@ import os
 import re
 
 class dataFile:
-    def __init__(self, root, fname, j):
+    def __init__(self, root, fname, j, v):
+        self.tabId = None
+        self.userId = None
+        self.title = None
+        self.timeSpentInFile = None
+        self.category = ""
+        self.isEQ = None
+
         self.filepath = os.path.join(root, fname)
         self.filename = fname
         self.jsonData = j
+        self.villageNum = v
+        self.time = self.determineTimeSpentInNode()
+
+        self.categories = { "tutorial":"tutorial",
+                            "game": "game",
+                            "book":"book",
+                            "shelf":"book",
+                            "hatua":"lesson",
+                            "video":"video"}
+
+
         self.parseFilename()
 
     def __str__(self):
-        toPrint = self.subject[0].capitalize() + ": " + self.tabId + "-" + self.userId + ": " + self.title
+        #toPrint = self.subject[0].capitalize() + ": " + self.tabId + "-" + self.userId + ": " + self.title
 
-        return toPrint
+        return ("== " + self.title + "== \n" +
+               "TabletID: " + self.tabId + "\n" +
+               "UsrID: " + self.userId + "\n" +
+               "UniqueID: " + self.tabId + "-" + self.userId + "\n" +
+               "Category: " + self.category + "\n" +
+               "EpicQuest: " + str(self.isEQ) + "\n" +
+               "VillageNum: " + str(self.villageNum) + "\n" +
+               "TimeInFile: " + str(self.time) )
 
     def getFilepath(self):
         return self.filepath
@@ -27,14 +52,35 @@ class dataFile:
     def getTabId(self):
         return self.tabId
 
-    def getSubject(self):
-        return self.subject
-
     def getUserId(self):
         return self.userId
 
+    def getUniqueId(self):
+        return self.tabId + "-" + self.getUserId()
+
+    def getTimeInFile(self):
+        return self.time
+
+    def getTitle(self):
+        return self.title
+
+    def getCategory(self):
+        return self.category
+
+    def getSubject(self):
+        return self.subject
+
+    def getIsEQ(self):
+        return self.isEQ
+
+    def getVillageNum(self):
+        return self.villageNum
+
+    def getFilepath(self):
+        return self.filepath
+
     def parseFilename(self):
-        rexp = r"^(.{10})-(\d)-(.*)-analytics-\d{12}"
+        rexp = r"(.{10})-(\d)-(.*)analytics"
 
         try:
             x = re.search(rexp, self.filename)
@@ -42,16 +88,27 @@ class dataFile:
             self.userId = x.group(2)
             self.title = x.group(3)
         except:
-            print ("Unable to parse filename")
+            print ("Unable to parse filename: ", self.filename)
 
-        if "tutorials" in self.filename:
-            self.subject = "tutorial"
-        elif "Game" in self.filename:
-            self.subject = "game"
-        elif "Lesson" in self.filename:
-            self.subject = "lesson"
+        if "EQ" in self.title:
+            self.isEQ = True
+            self.category += "EQ-"
         else:
-            self.subject = "book"
+            self.isEQ = False
+
+        for k,v in self.categories.items():
+            if k in self.title.lower() and len(self.category) < 4:
+                self.category += v
+
+    def determineTimeSpentInNode(self):
+        with open(self.filepath, "r") as readFile:
+            jsonData = json.load(readFile)
+
+            timestamps = []
+            for j in jsonData:
+                timestamps.append(j)
+
+            return (float(timestamps[-1]) - float(timestamps[0])) / 60000
 
     '''' rewrite this garbage too
     def determineTimeSpentInNode(self):
