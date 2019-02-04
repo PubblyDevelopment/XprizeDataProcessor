@@ -7,8 +7,7 @@ import sys
 import re
 import base64
 import json
-
-
+import hashlib
 
 def makeFilenamesReadable(filepath):
     for root, dirs, files in os.walk(filepath):
@@ -44,3 +43,34 @@ def checkIfValidJson(filepath):
     except ValueError:
         print("Bad json at", filepath)
         return False
+
+def hash_file(filename):
+    h = hashlib.md5()
+
+    with open(filename, 'rb') as file:
+        chunk = 0
+        while chunk != b'':
+            chunk = file.read(1024)
+            h.update(chunk)
+
+    return h.hexdigest()
+
+def duplicateRemover(filepath):
+    dates = next(os.walk(filepath))[1]
+    foundHashes = []
+
+    for d in dates:
+        print("DATE:", d)
+        for root, dirs, files in os.walk(os.path.join(filepath, d)):
+            for f in files:
+                h = hash_file(os.path.join(root,f))
+                if h in foundHashes:
+                    os.remove(os.path.join(root,f))
+                else:
+                    foundHashes.append(h)
+
+
+
+    print (foundHashes)
+
+duplicateRemover("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA_practice")
