@@ -65,6 +65,7 @@ def duplicateRemover(filepath):
             for f in files:
                 h = hash_file(os.path.join(root,f))
                 if h in foundHashes:
+                    print("File removed")
                     os.remove(os.path.join(root,f))
                 else:
                     foundHashes.append(h)
@@ -73,4 +74,4 @@ def duplicateRemover(filepath):
 
     print (foundHashes)
 
-duplicateRemover("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA_practice")
+duplicateRemover("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA")

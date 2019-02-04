@@ -10,18 +10,31 @@ class dataProcessor:
         self.allFiles = []
 
     def play_getAllFiles(self):
+        osWalk = os.walk(self.folderPath)
+        dates = next(osWalk)[1]
         for root, dirs, files in os.walk(self.folderPath):
             for f in files:
                 if determineIfValidUserAnalyticsFile(os.path.join(root, f)):
                     j = checkIfValidJson(os.path.join(root, f))
                     if (j):
                         v = root.split("/")[-2]
-                        self.allFiles.append(dataFile(root,f,j,v))
+                        for d in dates:
+                            print(d)
+                            if d in os.path.join(root, f):
+                                self.allFiles.append(dataFile(root,f,j,v, d))
 
+    def test_getAllFiles(self):
+        osWalk = os.walk(self.folderPath)
+        dates = next(osWalk)[1]
+        for root, dirs, files in os.walk(self.folderPath):
+            for f in files:
+                for d in dates:
+                    if d in os.path.join(root, f):
+                        print(f, "-->", d)
 
     def play_writeToCSV(self):
         rFile = open(self.resultFile, "w+")
-        rFile.write("tabID,userID,uniqueID,filename,time,category,EQ,villageNum\n")
+        rFile.write("tabID,userID,uniqueID,filename,time,category,EQ,villageNum,weekNum\n")
         for f in self.allFiles:
             if len(f.getCategory()) > 0:
                 rFile.write(f.getTabId() + "," +
@@ -31,17 +44,20 @@ class dataProcessor:
                         str(f.getTimeInFile()) + "," +
                         f.getCategory() + "," +
                         str(f.getIsEQ()) + "," +
-                        str(f.getVillageNum()) + "\n")
+                        str(f.getVillageNum()) + "\n" +
+                        str(f.getWeekNum())   )
 
     def play_printAllFiles(self):
         for f in self.allFiles:
-            if f.getIsEQ():
-                print(f.getFilepath())
+            print (f)
+
+        print (self.allFiles)
 
     def main(self):
+        #self.test_getAllFiles()
         self.play_getAllFiles()
-        #self.play_writeToCSV()
-        self.play_printAllFiles()
+        self.play_writeToCSV()
+        #self.play_printAllFiles()
 
 dp = dataProcessor(sys.argv[1], sys.argv[2])
 dp.main()

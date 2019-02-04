@@ -7,7 +7,7 @@ import os
 import re
 
 class dataFile:
-    def __init__(self, root, fname, j, v):
+    def __init__(self, root, fname, j, v, w):
         self.tabId = None
         self.userId = None
         self.title = None
@@ -19,6 +19,7 @@ class dataFile:
         self.filename = fname
         self.jsonData = j
         self.villageNum = v
+        self.weekNum = w
         self.time = self.determineTimeSpentInNode()
 
         self.categories = { "tutorial":"tutorial",
@@ -38,6 +39,7 @@ class dataFile:
                "TabletID: " + self.tabId + "\n" +
                "UsrID: " + self.userId + "\n" +
                "UniqueID: " + self.tabId + "-" + self.userId + "\n" +
+               "WeekNum: " + self.weekNum + "\n" +
                "Category: " + self.category + "\n" +
                "EpicQuest: " + str(self.isEQ) + "\n" +
                "VillageNum: " + str(self.villageNum) + "\n" +
@@ -75,6 +77,9 @@ class dataFile:
 
     def getVillageNum(self):
         return self.villageNum
+
+    def getWeekNum(self):
+        return self.weekNum
 
     def getFilepath(self):
         return self.filepath
