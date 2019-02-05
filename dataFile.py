@@ -20,7 +20,7 @@ class dataFile:
         self.jsonData = j
         self.villageNum = v
         self.weekNum = w
-        self.time = self.determineTimeSpentInNode()
+        self.time = self.getTimeSpentInFile()
 
         self.categories = { "tutorial":"tutorial",
                             "game": "game",
@@ -141,6 +141,13 @@ class dataFile:
         for j in self.jsonData:
             timestamps.append(j)
 
-        return (float(timestamps[-1])-float(timestamps[0]))/60000
+        if timestamps[-1].endswith("-1"):
+            return (float(timestamps[-2])-float(timestamps[0]))/60000
+        else:
+            return (float(timestamps[-1])-float(timestamps[0]))/60000
 
 #d = dataFile("fartFolder/", "5A27001608-2-Hatua%202-Lesson%20A-analytics-947265221619.json", "jsondata")
+
+print (bool("1547137654847-1".endswith("-1")))
+
+print ("FART")

@@ -14,12 +14,12 @@ class dataProcessor:
         dates = next(osWalk)[1]
         for root, dirs, files in os.walk(self.folderPath):
             for f in files:
+                print(os.path.join(root,f))
                 if determineIfValidUserAnalyticsFile(os.path.join(root, f)):
                     j = checkIfValidJson(os.path.join(root, f))
                     if (j):
                         v = root.split("/")[-2]
                         for d in dates:
-                            print(d)
                             if d in os.path.join(root, f):
                                 self.allFiles.append(dataFile(root,f,j,v, d))
 
@@ -44,8 +44,8 @@ class dataProcessor:
                         str(f.getTimeInFile()) + "," +
                         f.getCategory() + "," +
                         str(f.getIsEQ()) + "," +
-                        str(f.getVillageNum()) + "\n" +
-                        str(f.getWeekNum())   )
+                        str(f.getVillageNum()) + "," +
+                        str(f.getWeekNum()) + "\n"   )
 
     def play_printAllFiles(self):
         for f in self.allFiles:
