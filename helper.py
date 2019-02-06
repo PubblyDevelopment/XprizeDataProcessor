@@ -8,6 +8,7 @@ import re
 import base64
 import json
 import hashlib
+from shutil import copyfile
 
 def makeFilenamesReadable(filepath):
     for root, dirs, files in os.walk(filepath):
@@ -81,7 +82,7 @@ def duplicateRemover(filepath):
 
     print (foundFilenames)
 
-def syllTapTester():
+def bad_syllTapTester():
     x = 91 - 50
     y = 83 - 61
     ## Expected output: 35
@@ -102,7 +103,46 @@ def syllTapTester():
 
     cdX = int((x-(x%90)) / 90)
     cdY = int((y-(y%56)) / 56) - 1
-    print( grid[cdY][cdX]  )
+    print( grid[cdY][cdX] )
+
+def checkIfAnyFilesUnaccessed(accFile, allFile):
+    print("fart")
+
+    with open(accFile) as f:
+        accFiles = f.read().splitlines()
+
+    with open(allFile) as g:
+        allFiles = g.read().splitlines()
+
+    accFiles.sort()
+    allFiles.sort()
+
+    for i in range(0, len(allFiles)):
+        if allFiles[i] not in accFiles:
+            print (allFiles[i])
+
+def countInteractions(filepath):
+    jsons = []
+    for root, dirs, files in os.walk(filepath):
+        for f in files:
+            if f.endswith(".json"):
+                try:
+                    with open(os.path.join(root, f), "r") as readFile:
+                        jsonData = json.load(readFile)
+                        jsons.append((os.path.join(root,f), jsonData, f))
+                except:
+                    print("JSON failed at",f)
+
+    counter = 0
+    for j in jsons:
+        if len(j[1]) > 20:
+            print (j[0])
+            copyfile(j[0],os.path.join("/Users/wallis/Dev/XprizeDataProcessing/EQ_Village_Files_Richard",j[2]))
+            counter += 1
+    print(counter)
+
+
 #makeFilenamesReadable("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA/2019-01-25")
 #print(base64.b64decode("NjExMjAwMDEyMS0yLS9hbmRyb2lkX2Fzc2V0L3d3dy9zY2hvb2wvRXBpYyUyMFF1ZXN0L3ZhcmlhYmxlLUVRX0cyX1BvdHRlcnktRVFfRzJfUG90dGVyeS5odG1sLWFuYWx5dGljcy0xNTQ3Mzk1NDYxMDY0").decode('utf-8'))
-syllTapTester()
+#checkIfAnyFilesUnaccessed("/Users/wallis/Dev/XprizeDataProcessing/accEQs.txt","/Users/wallis/Dev/XprizeDataProcessing/allEQurls.txt")
+countInteractions("/Users/wallis/Dev/XprizeDataProcessing/EQ_Village_Files")
