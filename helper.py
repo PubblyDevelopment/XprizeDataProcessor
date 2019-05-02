@@ -142,7 +142,4 @@ def countInteractions(filepath):
     print(counter)
 
 
-#makeFilenamesReadable("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA/2019-01-25")
-#print(base64.b64decode("NjExMjAwMDEyMS0yLS9hbmRyb2lkX2Fzc2V0L3d3dy9zY2hvb2wvRXBpYyUyMFF1ZXN0L3ZhcmlhYmxlLUVRX0cyX1BvdHRlcnktRVFfRzJfUG90dGVyeS5odG1sLWFuYWx5dGljcy0xNTQ3Mzk1NDYxMDY0").decode('utf-8'))
-#checkIfAnyFilesUnaccessed("/Users/wallis/Dev/XprizeDataProcessing/accEQs.txt","/Users/wallis/Dev/XprizeDataProcessing/allEQurls.txt")
-countInteractions("/Users/wallis/Dev/XprizeDataProcessing/EQ_Village_Files")
+makeFilenamesReadable("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA/2019-01-25")
