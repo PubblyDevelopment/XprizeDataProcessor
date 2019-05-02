@@ -141,5 +141,32 @@ def countInteractions(filepath):
             counter += 1
     print(counter)
 
+def getTimeSpentInFile(filename):
+        timestamps = []
 
-makeFilenamesReadable("/Users/wallis/Dev/XprizeDataProcessing/BOXDATA/2019-01-25")
+        with open(filename) as jsonFile:
+            jsonData = json.load(jsonFile)
+            for j in jsonData:
+                timestamps.append(j)
+
+        if timestamps[-1].endswith("-1"):
+            return (float(timestamps[-2])-float(timestamps[0]))/60000
+        else:
+            return (float(timestamps[-1])-float(timestamps[0]))/60000
+
+def getFileSize(filename):
+    return os.stat(filename).st_size
+
+def main(filepath):
+    for root, dirs, files in os.walk(filepath):
+        for f in files:
+            if determineIfValidUserAnalyticsFile((os.path.join(root, f))):
+                try:
+                    time = getTimeSpentInFile(os.path.join(root, f))
+                    size = getFileSize((os.path.join(root, f)))
+                    f = open("RESULTS.csv","a+")
+                    f.write(str(size) + "," + str(time) + "\n")
+                except:
+                    print ("JSON bad @", f)
+
+main("/Users/wallis/PycharmProjects/XprizeDataProcessor/sample-data")
