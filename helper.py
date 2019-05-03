@@ -14,11 +14,9 @@ def makeFilenamesReadable(filepath):
     for root, dirs, files in os.walk(filepath):
         for f in files:
             isJSON = re.search(r"(.*).json", f)
-
             if (isJSON):
                 try:
                     decodedFilename = base64.b64decode(isJSON.group(1)).decode('utf-8')
-
                     if "/" in decodedFilename:
                         os.rename(os.path.join(root, f), os.path.join(root, decodedFilename.split("/")[0] +
                                                                       decodedFilename.split("/")[-1] + ".json"))
@@ -27,8 +25,6 @@ def makeFilenamesReadable(filepath):
                 except:
                     print ("Decode failed at", f)
 
-
-    print ("done.")
 
 def determineIfValidUserAnalyticsFile(filepath):
     rexp = r".{10}-\d-analytics"
@@ -144,29 +140,63 @@ def countInteractions(filepath):
 def getTimeSpentInFile(filename):
         timestamps = []
 
-        with open(filename) as jsonFile:
-            jsonData = json.load(jsonFile)
-            for j in jsonData:
-                timestamps.append(j)
+        try:
+            with open(filename) as jsonFile:
+                jsonData = json.load(jsonFile)
+                for j in jsonData:
+                    timestamps.append(j)
 
-        if timestamps[-1].endswith("-1"):
-            return (float(timestamps[-2])-float(timestamps[0]))/60000
-        else:
-            return (float(timestamps[-1])-float(timestamps[0]))/60000
+            if timestamps[-1].endswith("-1"):
+                return (float(timestamps[-2])-float(timestamps[0]))/60000
+            else:
+                return (float(timestamps[-1])-float(timestamps[0]))/60000
+        except:
+            print ("Bad JSON @", filename)
 
 def getFileSize(filename):
     return os.stat(filename).st_size
 
-def main(filepath):
-    for root, dirs, files in os.walk(filepath):
-        for f in files:
-            if determineIfValidUserAnalyticsFile((os.path.join(root, f))):
-                try:
-                    time = getTimeSpentInFile(os.path.join(root, f))
-                    size = getFileSize((os.path.join(root, f)))
-                    f = open("RESULTS.csv","a+")
-                    f.write(str(size) + "," + str(time) + "\n")
-                except:
-                    print ("JSON bad @", f)
+def mainRead(filepath):
+    makeFilenamesReadable(filepath)
 
-main("/Users/wallis/PycharmProjects/XprizeDataProcessor/sample-data")
+def getTabID(filename):
+    rexp = r"(.{10})-(\d)-(.*)analytics"
+
+    try:
+        x = re.search(rexp, filename)
+        return x.group(1)
+    except:
+        print ("Unable to parse filename: ", filename)
+
+def mainCSV(filepath):
+    print ("???")
+    v = [0, 240, 240, 243, 247, 244, 235, 241, 244, 248, 146, 242, 237, 243, 247,
+            240, 241, 241, 243, 234, 231, 215, 206, 248, 215, 277, 243, 228, 244]
+    finalCSV = ""
+    
+    for i in range(1, 29, 1):
+        print ("Village:", i)
+        for root, dirs, files in os.walk(os.path.join(filepath, str(i))):
+            for f in files:
+                if determineIfValidUserAnalyticsFile(os.path.join(root, f)) and checkIfValidJson(os.path.join(root, f)):
+
+                    #print(f)
+                    vill = i
+                    tabID = getTabID(f)
+                    days = v[i]
+                    time = getTimeSpentInFile(os.path.join(root, f))
+                    
+                    finalCSV += str(vill) + "," + tabID + "," + str(days) + "," + str(time) + "\n"
+                    
+
+
+
+    newFile = open("RESULTS.csv","w+")
+    newFile.write(finalCSV)
+
+
+
+mainCSV(r'C:\Users\Administrator\Desktop\all data')
+#makeFilenamesReadable(r'/c/Users/Administrator/Desktop')
+#print(getTabID("6115001102-2-Hatua%201-Lesson%2027-analytics-947126900136.json"))
+#print(os.path.join(r'C:\Users\Administrator\Desktop\all data', str(5)))
