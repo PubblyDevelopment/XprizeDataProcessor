@@ -8,6 +8,7 @@ import re
 import base64
 import json
 import hashlib
+from datetime import datetime as dt
 from shutil import copyfile
 
 def makeFilenamesReadable(filepath):
@@ -137,11 +138,11 @@ def countInteractions(filepath):
             counter += 1
     print(counter)
 
-def getTimeSpentInFile(filename):
+def getTimeSpentInFile(filepath):
         timestamps = []
 
         try:
-            with open(filename) as jsonFile:
+            with open(filepath) as jsonFile:
                 jsonData = json.load(jsonFile)
                 for j in jsonData:
                     timestamps.append(j)
@@ -159,6 +160,9 @@ def getFileSize(filename):
 def mainRead(filepath):
     makeFilenamesReadable(filepath)
 
+def getFileModifiedDate(filepath):
+   return dt.fromtimestamp(os.path.getmtime(filepath))
+
 def getTabID(filename):
     rexp = r"(.{10})-(\d)-(.*)analytics"
 
@@ -168,11 +172,38 @@ def getTabID(filename):
     except:
         print ("Unable to parse filename: ", filename)
 
+def getLessonLevel(filename):
+    rexp = r"Hatua%20(\d)"
+
+    try:
+        x = re.search(rexp, filename)
+        return x.group(1)
+    except:
+        print ("Unable to parse filename: ", filename)
+
+def getCategory(filename):
+    category = ""
+    categories = {  "hatua":"lesson",
+                    "tutorial":"tutorial",
+                    "game": "game",
+                    "book":"book",
+                    "shelf":"book",
+                    "video":"video"}
+
+    for k,v in categories.items():
+        if k in filename.lower() and len(category) < 4:
+            category += v
+            if category == "lesson":
+                category += getLessonLevel(filename)
+    return category
+
 def mainCSV(filepath):
     print ("???")
     v = [0, 240, 240, 243, 247, 244, 235, 241, 244, 248, 146, 242, 237, 243, 247,
             240, 241, 241, 243, 234, 231, 215, 206, 248, 215, 277, 243, 228, 244]
-    finalCSV = ""
+    
+    newFile = open("RESULTS_extended.csv","a+")
+    newFile.write("village,tabID,days,filename,modified,filesize,category,time\n")
     
     for i in range(1, 29, 1):
         print ("Village:", i)
@@ -184,19 +215,29 @@ def mainCSV(filepath):
                     vill = i
                     tabID = getTabID(f)
                     days = v[i]
+                    mod = getFileModifiedDate(os.path.join(root, f))
+                    size = getFileSize(os.path.join(root, f))
+                    cat = getCategory(f)
                     time = getTimeSpentInFile(os.path.join(root, f))
+
+                    toCSV = (str(vill) + "," +
+                             str(tabID) + "," +
+                             str(days) + "," +
+                             f[:-5] + "," +
+                             str(mod) + "," +
+                             str(size) + "," +
+                             cat + "," +   
+                             str(time) + "\n")
+
+                    #print(toCSV)
+                    newFile.write(toCSV)
                     
-                    finalCSV += str(vill) + "," + tabID + "," + str(days) + "," + str(time) + "\n"
-                    
-
-
-
-    newFile = open("RESULTS.csv","w+")
-    newFile.write(finalCSV)
+    
 
 
 
 mainCSV(r'C:\Users\Administrator\Desktop\all data')
 #makeFilenamesReadable(r'/c/Users/Administrator/Desktop')
-#print(getTabID("6115001102-2-Hatua%201-Lesson%2027-analytics-947126900136.json"))
+#print(getFileModifiedDate(r"C:\Users\Administrator\Desktop\all data\8\REMOTE\5A23002184-2-Hatua%201-Game%203%20dif%201-analytics-947332271020.json"))
+#print(getCategory(r"5A23002184-2-Hatua%201-Game%203%20dif%201-analytics-947332271020.json"))
 #print(os.path.join(r'C:\Users\Administrator\Desktop\all data', str(5)))
