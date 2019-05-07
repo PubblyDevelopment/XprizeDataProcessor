@@ -1,6 +1,6 @@
 library("ggplot2")
 
-data <- read.csv(file="/Users/wallis/Dev/XprizeDataProcessing/result.csv")
+data <- read.csv(file="/Users/wallis/PycharmProjects/XprizeDataProcessor/RESULTS_notimes.csv")
 
 table(data$uniqueID)
 plot(data$villageNum, data$isEQ)

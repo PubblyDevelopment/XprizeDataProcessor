@@ -198,7 +198,6 @@ def getCategory(filename):
     return category
 
 def mainCSV(filepath):
-    print ("???")
     v = [0, 240, 240, 243, 247, 244, 235, 241, 244, 248, 146, 242, 237, 243, 247,
             240, 241, 241, 243, 234, 231, 215, 206, 248, 215, 277, 243, 228, 244]
     
@@ -233,10 +232,67 @@ def mainCSV(filepath):
                     newFile.write(toCSV)
                     
     
+def cleanTimestamps(oldfile, newfile):
+    rexp = r"201(8|9)-\d{2}-\d{2}( .+?),"
+    
+    newFile = open(newfile, "a+")
+    oldFile = open(oldfile, "r")
 
+    for line in oldFile:
+        try:
+            x = re.search(rexp, line)
+            newFile.write(line.replace(x.group(2),""))
+        except:
+            print ("Parse failed @ ", line)
+        
+def sortDates(filepath):
+    dates = []
+    dateFile = open(filepath, "r")
+    for d in dateFile:
+        # Extremely lazy way to strip newlines LOL 
+        dates.append(d[0:10])
 
+    return sorted(dates, key=sortHelper)
 
-mainCSV(r'C:\Users\Administrator\Desktop\all data')
+def sortHelper(elem):
+    split = elem.split('-')
+    return split[0], split[1], split[2]
+
+def genTimeUsage(masterfile, newfile, sorteddates):
+    dates = {}
+    for d in sorteddates:
+        dates[d] = [0, 0]
+    
+    master = open(masterfile, "r")
+
+    next(master)
+    for line in master:
+        split = line.split(",")
+        dates[split[4]][0] += 1 
+        dates[split[4]][1] += float(split[7])
+
+    newFile = open(newfile, "a+")
+
+    newFile.write("date,files,time,avg\n")
+    for k,v in dates.items():
+        newFile.write(k + "," + str(v[0]) + "," + str(v[1]) + "," + str(v[1]/v[0])+ "\n")
+
+def sortMaster(filepath):
+    # Get contents of file pre-sort
+    wholeFile = []
+    master = open(filepath, "r")
+    next(master)
+    for line in master:
+        wholeFile.append(line)
+
+    for w in wholeFile:
+        print (w)
+
+sortMaster("RESULTS_nooutliers.csv")
+#cleanTimestamps("RESULTS_extended.csv","RESULTS_notimes.csv")
+#d = sortDates("/Users/wallis/PycharmProjects/XprizeDataProcessor/uniquedates.txt")
+#genTimeUsage("/Users/wallis/PycharmProjects/XprizeDataProcessor/RESULTS_notimes.csv","RESULTS_overtime.csv",d)
+#mainCSV(r'C:\Users\Administrator\Desktop\all data')
 #makeFilenamesReadable(r'/c/Users/Administrator/Desktop')
 #print(getFileModifiedDate(r"C:\Users\Administrator\Desktop\all data\8\REMOTE\5A23002184-2-Hatua%201-Game%203%20dif%201-analytics-947332271020.json"))
 #print(getCategory(r"5A23002184-2-Hatua%201-Game%203%20dif%201-analytics-947332271020.json"))
