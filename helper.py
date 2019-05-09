@@ -9,6 +9,7 @@ import base64
 import json
 import hashlib
 from datetime import datetime as dt
+from datetime import *
 from shutil import copyfile
 
 def makeFilenamesReadable(filepath):
@@ -60,6 +61,19 @@ def hash_file(filename):
             h.update(chunk)
 
     return h.hexdigest()
+
+def genAllTimes(filepath):
+    new = open(filepath, "a+")
+
+    from datetime import date, timedelta
+
+    d1 = date(2018, 5, 15)  # start date
+    d2 = date(2019, 3, 8)  # end date
+
+    delta = d2 - d1         # timedelta
+
+    for i in range(delta.days + 1):
+        new.write("0," + str(d1 + timedelta(i)) + ",0.0\n")
 
 def duplicateRemover(filepath):
     dates = next(os.walk(filepath))[1]
@@ -254,7 +268,7 @@ def sortDates(filepath):
 
     return sorted(dates, key=sortHelper)
 
-def sortHelper(elem):
+def sortHelperOld(elem):
     split = elem.split('-')
     return split[0], split[1], split[2]
 
@@ -277,18 +291,163 @@ def genTimeUsage(masterfile, newfile, sorteddates):
     for k,v in dates.items():
         newFile.write(k + "," + str(v[0]) + "," + str(v[1]) + "," + str(v[1]/v[0])+ "\n")
 
-def sortMaster(filepath):
+def sortMaster(oldfile, newfile):
     # Get contents of file pre-sort
     wholeFile = []
-    master = open(filepath, "r")
-    next(master)
+    master = open(oldfile, "r")
+    new = open(newfile, "a+")
+
+    # Skips first line which has the header names, saves column names for later
+    columnNames = next(master)
     for line in master:
         wholeFile.append(line)
 
-    for w in wholeFile:
-        print (w)
+    sortFile = sorted(wholeFile, key=sortHelper)
+    sortFile.insert(0, columnNames)
 
-sortMaster("RESULTS_nooutliers.csv")
+    for s in sortFile:
+        new.write(s)
+
+def sortHelper(elem):
+    column = elem.split(",")[4]
+    split = column.split("-")
+    return split[0], split[1], split[2]
+
+def reduceBySumming(oldfile, newfile):
+    master = open(oldfile, "r")
+    new = open(newfile, "a+")
+    d = {}
+
+    next(master)
+    for line in master:
+        split = line.split(",")
+        if split[4] not in d:
+            d[split[4]] = [0.0] * 28
+        else:
+            # Ridiculous
+            d[split[4]][int(split[0])-1] += split[7]
+            #d[split[4]][int(split[0])-1] += min(float(split[7]), 0.2698 + 0.0003281 * (float(split[5])))
+
+            #d[split[4]][int(split[0])-1] += 1
+
+    for k,v in d.items():
+        for i in range(0, len(v)):
+            if v[i] > 0.0:
+                new.write(str(i+1) + "," + k + "," + str(v[i]) + "\n")
+
+def getAllTimeStamps(filepath):
+    with open(filepath, "r") as readFile:
+        jsonData = json.load(readFile)
+
+        timestamps = []
+        for j in jsonData:
+            timestamps.append(j)
+
+    for t in timestamps:
+        print(dt.fromtimestamp(int(t)/1000), "|", t)
+
+def generateAveragesOverTime(oldfile, newfile, date1, date2):
+    old = open(oldfile, "r")
+    new = open(newfile, "a+")
+    dumps = {}
+
+    for i in range(1, 29):
+        dumps[i] = []
+
+    
+    next(old)
+    for line in old:
+        split = line.split(',')
+
+        # Using list comp to very LAZILY remove newlines because I'm LAZY
+        village, date, time = split[0], split[1], split[2][0:-1]
+
+        dumps[int(village)].append([date, time])
+
+    for k, v in dumps.items():
+        village = k
+        for i in range(1, len(v)):
+            time = v[i][1]
+            d1 = v[i-1][0]
+            d2 = v[i][0]
+            daysBetween = getTimeBetweenTwoDates(d1, d2)
+            length = len(daysBetween)
+            avg = float(time)/length
+            for d in daysBetween:
+                new.write(str(village) + "," + d + "," + str(avg) + "\n")
+
+
+
+def getTimeBetweenTwoDates(date1, date2):
+    '''d1, d2 = [None] * 3, [None] * 3
+    
+    d1[0], d1[1], d1[2] = int(date1[0:4]),int(date1[5:7]),int(date1[8:10])
+    d2[0], d2[1], d2[2] = int(date2[0:4]),int(date2[5:7]),int(date2[8:10])
+
+    x = date(d1[0], d1[1], d1[2])
+    y = date(d2[0], d2[1], d2[2])'''
+
+    x = dt.strptime(date1, '%Y-%m-%d')
+    y = dt.strptime(date2, '%Y-%m-%d')
+
+    delta = y - x
+    
+    results = []
+    for i in range(abs(delta.days)):
+        results.append((x + timedelta(i)).strftime('%Y-%m-%d'))
+    return results
+
+def getUniqueTabletsPerDump(filepath):
+    d = {}
+    data = open(filepath, "r")
+    next(data)
+
+    '''for line in data:
+        split = line.split(",")
+        date, village, tabID = split[4], split[0], split[1]
+        print (date, village, tabID, "\n")
+        if date in d:
+            d[date][int(village)-1].add(tabID)
+        else:
+            d[date] = [set()] * 28
+
+    for k,v in d.items():
+        print (k, v)'''
+    for line in data:
+        split = line.split(",")
+        date, village, tabID = split[4], split[0], split[1]
+        if date not in d:
+            d[date] = []
+            for i in range(0, 28):
+                d[date].append([])
+        else:
+            d[date][int(village)-1].append(tabID)
+
+
+    '''d["2019-03-08"][4].append("fart")
+    for i in d["2019-03-08"]:
+        print(i)'''
+
+    for k, v in d.items():
+        print ("DATE", k)
+        for i in v:
+            print (len(set(i)))
+
+    return d
+
+    
+#getUniqueTabletsPerDump("RESULTS_sorted.csv")
+#getAllTimeStamps("/Users/wallis/Downloads/all data/23/REMOTE/test.json")
+#reduceBySumming("RESULTS_sorted.csv","RESULTS_sortedsumreduced.csv")
+#genAllTimes("all_times.csv")
+
+#print(getTimeBetweenTwoDates("2018-07-09","2018-07-05"))
+
+generateAveragesOverTime("RESULTS_sortedsum.csv", "RESULTS_normalized.csv")
+'''for d in getTimeBetweenTwoDates("2019-04-01","2020-04-01"):
+    print (d)'''
+
+#sortMaster("RESULTS_nooutliers.csv", "RESULTS_sorted.csv")
 #cleanTimestamps("RESULTS_extended.csv","RESULTS_notimes.csv")
 #d = sortDates("/Users/wallis/PycharmProjects/XprizeDataProcessor/uniquedates.txt")
 #genTimeUsage("/Users/wallis/PycharmProjects/XprizeDataProcessor/RESULTS_notimes.csv","RESULTS_overtime.csv",d)
